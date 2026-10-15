@@ -62,6 +62,7 @@ class clean_all:
 
         list_of_phone_names = ["PhoneNumber" , "phone" , "contactnumber" , "phonenumber" , "Phone" , "phoneno", "phone_number" , "Farmer Phone Number"]
         list_of_woreda_names = ["woreda" , "Woreda" , "WOREDA" ]
+        
 
         df = df.columns.tolist()
 
@@ -234,8 +235,8 @@ class clean_all:
 if __name__ == "__main__":
     BASE = Path(__file__).resolve().parents[1]
 
-    path = BASE / "data" / "extracted"
-    output_path = BASE / "data" / "cleaned"
+    path = BASE / "data" / "cleaned" / "sent_files_precleaned"
+    output_path = BASE / "data" / "cleaned" / "sent_files_cleaned"
 
     list_of_files = [file for file in path.glob("*.xlsx")]
     print(f"found (({len(list_of_files)})) files to be cleaned  and cleaned ")
@@ -243,3 +244,5 @@ if __name__ == "__main__":
     for file in list_of_files:
         clean = clean_all()
         clean.clean_sheet(file , output_path)
+
+
