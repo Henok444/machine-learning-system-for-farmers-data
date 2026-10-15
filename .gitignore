@@ -1,0 +1,4 @@
+*.xlsx
+*.pyc
+*.~lock
+/data/storage
