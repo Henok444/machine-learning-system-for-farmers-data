@@ -82,8 +82,6 @@ def find_column_no(path):
     df = pd.read_excel(path,  nrows= 0 , engine= "openpyxl")
     
 
-    list_of_phone_names = ["Phone Number" , "phone" , "Contact Number" , "phone" , "Phone" , "PHONE No" , ]
-    list_of_woreda_names = ["woreda" , "Woreda" , "WOREDA" ]
 
     df = df.columns.tolist()
 
@@ -96,12 +94,17 @@ def find_column_no(path):
 
     for name in df:
 
-        if name in  list_of_phone_names : 
+        if name == "phone" : 
             phone_column_n = i 
-        if name  in list_of_woreda_names:
+        if name  == "woreda":
             woreda_column_n = i 
             woreda_name = name 
         i+=1 
+    df = pd.read_excel(path,  nrows= 3 , engine= "openpyxl")
+    print(path)
+    print(df.iloc[0,woreda_column_n])
+    print(df.iloc[0,phone_column_n])
+    print(df)
 
     return phone_column_n ,woreda_column_n , woreda_name
 
@@ -113,8 +116,7 @@ def create_dict(path )-> dict :
     """
     phone , woreda , woreda_name = find_column_no(path)
     df = pd.read_excel(path, usecols= [phone , woreda], engine= "openpyxl")
-    print(path)
-    print(df)
+
 
     
    
@@ -131,15 +133,10 @@ def run(files):
     j = 0 
     
     for file in files:
-        print("@"*150)
+
         if i == j:
             df , woreda_name = create_dict(file)
-            print("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
-            print([item for item in df[woreda_name] if isinstance(item , int)])
-            print(any([item for item in df[woreda_name]if isinstance(item , int)]))
-            print([item for item in df[woreda_name] if (isinstance(item , float) and not pd.isna(item))]) 
-            print(any([item for item in df[woreda_name]  if (isinstance(item , float) and not pd.isna(item))])) 
-            print("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+
 
             if any([item for item in df[woreda_name] if  isinstance(item , int)]) or any([item for item in df[woreda_name]  if (isinstance(item , float) and not pd.isna(item))]) :
                 print(f"🚨🚨🚨🚨🚨the file ((({file})))  contain no in the woreda column must be reviewed and cleaned by hand so it is droped out of the dictionary")
@@ -149,17 +146,12 @@ def run(files):
                 print("@"*150)
                 continue
             i+=1
-            print("@"*150)
+
             continue
 
         
         next_df , woreda_name = create_dict(file)
-        print("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
-        print([item for item in next_df[woreda_name] if isinstance(item , int)])
-        print(any([item for item in next_df[woreda_name] if isinstance(item , int)]))
-        print([item for item in next_df[woreda_name]  if (isinstance(item , float) and not pd.isna(item))])
-        print(any([item for item in next_df[woreda_name]  if (isinstance(item , float) and not pd.isna(item))]))
-        print("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+
         if any([item for item in next_df[woreda_name] if isinstance(item , int)]) or any([item for item in next_df[woreda_name] if (isinstance(item , float) and not pd.isna(item))]) :
             print(f"🚨🚨🚨🚨🚨the file ((({file})))  contain no in the woreda column must be reviewed and cleaned by hand so it is droped out of the dictionary")
             i+=1
@@ -170,9 +162,13 @@ def run(files):
         i +=1
 
     df["phone"] = df["phone"].astype(str).str.replace(r"\.0" , "" , regex = True ) 
-    print("@"*150)
+    df = df.dropna(subset=['phone'])
+
+# 2. Fill empty/NaN values in the 'woreda' column with the custom string
+    df['woreda'] = df['woreda'].fillna("no woreda in the sent file")
+    df.to_excel(output_path , index = False , engine= "openpyxl")
     
-    return 
+    return df
 
 print("="*80)
 print("dictionary creator started ")
@@ -186,7 +182,7 @@ output_path = BASE / "data" / "dict" / "dict.xlsx"
 list_of_files = [f for f in path.glob("*.xlsx")]
 
 dictionary = run(list_of_files)
-dictionary.to_excel(output_path , index = False , engine= "openpyxl")
+
 print(dictionary)
 
 print("="*80)

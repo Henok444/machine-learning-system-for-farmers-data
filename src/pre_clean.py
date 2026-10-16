@@ -100,6 +100,8 @@ class findit:
             self.header = 1 
         if largest_list == "c":
             self.header = 2 
+
+        
         
         if len(found_df_1_headers) == len(found_df_2_headers)  == len(found_df_3_headers) :
             return "error"
@@ -146,6 +148,26 @@ class findit:
             df.to_excel(final_path ,index=False , engine= "openpyxl") 
                     
             return None
+        # start checking the no of colimn called phone and wored if more than one send it to fix folder
+        df_check = pd.read_excel(path , header= self.header , nrows=0 , engine= "openpyxl")
+        df_check = df_check.columns.to_list()
+        s=0
+        k=0
+        for l in df_check:
+        
+            if "phone" in str(l):
+                s+=1 
+            if "woreda" in str(l):
+                k+=1
+        if k>1 or s>1:
+            df = pd.read_excel(path , engine= "openpyxl")
+
+            final_path = out_put_path_2 / Path(path).name
+
+            df.to_excel(final_path ,index=False , engine= "openpyxl") 
+                    
+            return None   
+        # end checking the no of colimn called phone and wored if more than one send it to fix folder       
         
         df = pd.read_excel(path , header= self.header , engine= "openpyxl")
         df = df.iloc[:, col:]
