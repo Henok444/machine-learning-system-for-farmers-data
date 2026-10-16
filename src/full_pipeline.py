@@ -35,7 +35,7 @@ output woreda_added
 """
 from pathlib import Path
 
-#=====================================================================
+#===========================file extracter start ==========================================
 
 from src.sheet_extracter import extract
 
@@ -64,7 +64,7 @@ print("&"*200)
 print("sheet extractor ended")
 print("&"*200)
 
-#============================================================
+#==========================pre clean start ==================================
 
 path = BASE  / "data" / "extracted" / "sent_files"
 
@@ -88,7 +88,7 @@ for file in files:
 
 
 
-#========================================================
+#========================= master clean start ===============================
 
 from src.master_clean import clean_all
 
@@ -114,7 +114,7 @@ print(f"-----------------------------------------------------------cleaned------
 print("master cleaner ended")
 print("="*80)
 
-#==========================================================
+#=================== dict creation start =======================================
 
 
 
@@ -133,15 +133,14 @@ output_path = BASE / "data" / "dict" / "dict.xlsx"
 list_of_files = [f for f in path.glob("*.xlsx")]
 
 dictionary = run(list_of_files)
-dictionary.to_excel(output_path , index = False , engine= "openpyxl")
-print(dictionary)
+
 
 print("="*80)
 print("dictionary creator ended ")
 print("="*80)
 
 
-#================================================================
+#=========================add woreda start =======================================
 
 
 
@@ -163,7 +162,7 @@ list_of_path_for_database = [f for f in database_path.glob("*.xlsx")]
 for path in list_of_path_for_database:
     print(f"adding woreda for (({path.name}))")
     new_path = output_path / Path(path).name
-    add_woreda(path , new_path , dictionary)
+    add_woreda(path , new_path)
 
 
 print("="*80)
