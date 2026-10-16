@@ -36,8 +36,8 @@ import openpyxl
 #=========================load the file ==================
 
 BASE = Path(__file__).resolve().parents[1]
-path = BASE / "data" / "cleaned" 
-database_path = BASE / "data" / "data_base_cleaned"
+path = BASE / "data" / "cleaned"  / "sent_files_cleaned"
+database_path = BASE / "cleaned" / "data_base_files_cleaned"
 output_path = BASE / "data" / "woreda_added"
 
 
@@ -55,7 +55,7 @@ path_for_dic = BASE / "data" / "cleaned"
 
 
 
-list_of_files = [f for f in path_for_dic.glob("*.xlsx")]
+list_of_files = [f for f in path.glob("*.xlsx")]
 
 dictionary = run(list_of_files)
 

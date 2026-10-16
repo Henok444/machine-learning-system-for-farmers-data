@@ -80,12 +80,14 @@ list_of_files = [f for f in path.glob("*.xlsx")]
 def find_column_no(path):
 
     df = pd.read_excel(path,  nrows= 0 , engine= "openpyxl")
+    
 
-    list_of_phone_names = ["Phone Number" , "phone" , "Contact Number" , "phone" , "Phone" , "PHONE No",]
+    list_of_phone_names = ["Phone Number" , "phone" , "Contact Number" , "phone" , "Phone" , "PHONE No" , ]
     list_of_woreda_names = ["woreda" , "Woreda" , "WOREDA" ]
 
     df = df.columns.tolist()
-   
+
+    
 
     woreda_column_n = 0 
     phone_column_n = 0 
@@ -111,6 +113,8 @@ def create_dict(path )-> dict :
     """
     phone , woreda , woreda_name = find_column_no(path)
     df = pd.read_excel(path, usecols= [phone , woreda], engine= "openpyxl")
+    print(path)
+    print(df)
 
     
    
@@ -167,11 +171,24 @@ def run(files):
 
     df["phone"] = df["phone"].astype(str).str.replace(r"\.0" , "" , regex = True ) 
     print("@"*150)
-    return df
+    
+    return 
 
-if __name__ == "__main__":
+print("="*80)
+print("dictionary creator started ")
+print("="*80)
 
-    df = run(list_of_files)
-    df.to_excel(output_path , index = False , engine= "openpyxl")
-    print(df)
 
+BASE =  Path(__file__).resolve().parents[1]
+path = BASE / "data" / "cleaned" / "sent_files_cleaned"
+output_path = BASE / "data" / "dict" / "dict.xlsx"
+
+list_of_files = [f for f in path.glob("*.xlsx")]
+
+dictionary = run(list_of_files)
+dictionary.to_excel(output_path , index = False , engine= "openpyxl")
+print(dictionary)
+
+print("="*80)
+print("dictionary creator ended ")
+print("="*80)
