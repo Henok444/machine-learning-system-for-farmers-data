@@ -35,7 +35,7 @@ output woreda_added
 """
 from pathlib import Path
 
-#=====================================================================
+#===========================file extracter start ==========================================
 
 from src.sheet_extracter import extract
 
@@ -45,8 +45,8 @@ print("sheet extractor started")
 print("&"*200)
 
 
-base = Path(__file__).resolve().parents[1]
-c = base /"data"/"input"
+BASE = Path(__file__).resolve().parents[1]
+c = BASE /"data"/"input"
 
 list_of_files = [f for f in c.glob("*.xlsx") ]
 
@@ -64,7 +64,31 @@ print("&"*200)
 print("sheet extractor ended")
 print("&"*200)
 
-#============================================================
+#==========================pre clean start ==================================
+
+path = BASE  / "data" / "extracted" / "sent_files"
+
+
+
+files = [f for f in path.glob("*.xlsx")]
+
+out_put_path = BASE / "data" / "cleaned" / "sent_files_precleaned"
+
+paths =files[0]
+
+
+
+from src.pre_clean import findit
+clean = findit()
+
+for file in files:
+    find = findit()
+
+    find.clean(file , out_put_path)
+
+
+
+#========================= master clean start ===============================
 
 from src.master_clean import clean_all
 
@@ -74,12 +98,12 @@ print("="*80)
 
 BASE = Path(__file__).resolve().parents[1]
 
-path = BASE / "data" / "extracted"
-output_path = BASE / "data" / "cleaned"
+path = BASE / "data" / "cleaned" / "sent_files_precleaned"
+output_path = BASE / "data" / "cleaned" / "sent_files_cleaned"
 
 list_of_files = [file for file in path.glob("*.xlsx")]
 
-
+print(len(list_of_files))
 
 for file in list_of_files:
     clean = clean_all()
@@ -90,7 +114,7 @@ print(f"-----------------------------------------------------------cleaned------
 print("master cleaner ended")
 print("="*80)
 
-#==========================================================
+#=================== dict creation start =======================================
 
 
 
@@ -103,21 +127,20 @@ print("="*80)
 
 
 BASE =  Path(__file__).resolve().parents[1]
-path = BASE / "data" / "cleaned"
+path = BASE / "data" / "cleaned" / "sent_files_cleaned"
 output_path = BASE / "data" / "dict" / "dict.xlsx"
 
 list_of_files = [f for f in path.glob("*.xlsx")]
 
 dictionary = run(list_of_files)
-dictionary.to_excel(output_path , index = False , engine= "openpyxl")
-print(dictionary)
+
 
 print("="*80)
 print("dictionary creator ended ")
 print("="*80)
 
 
-#================================================================
+#=========================add woreda start =======================================
 
 
 
@@ -129,8 +152,7 @@ print("="*80)
 
 
 BASE = Path(__file__).resolve().parents[1]
-path = BASE / "data" / "cleaned" 
-database_path = BASE / "data" / "data_base_cleaned"
+database_path = BASE / "data" / "cleaned" /"data_base_files_cleaned"
 output_path = BASE / "data" / "woreda_added"
 
 list_of_path = [file for file in path.glob("*.xlsx")]
@@ -140,7 +162,7 @@ list_of_path_for_database = [f for f in database_path.glob("*.xlsx")]
 for path in list_of_path_for_database:
     print(f"adding woreda for (({path.name}))")
     new_path = output_path / Path(path).name
-    add_woreda(path , new_path , dictionary)
+    add_woreda(path , new_path)
 
 
 print("="*80)

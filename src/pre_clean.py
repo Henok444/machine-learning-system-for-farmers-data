@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import re
 
 
 BASE  = Path(__file__).resolve().parents[1]
@@ -12,6 +13,8 @@ path = BASE  / "data" / "extracted" / "sent_files"
 files = [f for f in path.glob("*.xlsx")]
 
 out_put_path = BASE / "data" / "cleaned" / "sent_files_precleaned"
+out_put_path_2 = BASE / "data" / "files_must_be_fixed"
+
 
 paths =files[0]
 
@@ -20,6 +23,15 @@ class findit:
         self.header = header
         self.column = starting_col
         pass
+
+    def clean_text(self , list):
+        ret_list = []
+        for value  in list:
+
+            text = re.sub(r"\s+", "", str(value)).strip().lower()
+            ret_list.append(text)
+        return ret_list
+    
     def find_header(self , path):
         """  first find the the column header"""
         
@@ -34,16 +46,16 @@ class findit:
         df_2 = df_2.columns.to_list()
         df_3 = df_3.columns.to_list()
 
-        df_1 = [str(l) for l in df_1]
-        df_2 = [str(l) for l in df_2]
-        df_3 = [str(l) for l in df_3]
+        df_1 = self.clean_text([str(l) for l in df_1])
+        df_2 = self.clean_text([str(l) for l in df_2])
+        df_3 = self.clean_text([str(l) for l in df_3])
 
         
 
         headers = [df_1 , df_2 , df_3]
         print(headers)
 
-        list_of_names = ["PhoneNumber" , 'Sex' , "sex" , "name" , "Name" , "Farmers Name", "phone" , "contactnumber" , "phonenumber" , "Phone" , "phoneno", "phone_number" , "Farmer Phone Number" , "woreda" , "Woreda" , "WOREDA"  ]
+        list_of_names = ["PhoneNumber" , 'Sex' , "mobileno" , "sex" , "name" , "Name" , "FarmersName", "phone" , "contactnumber" , "phonenumber" , "Phone" , "phoneno", "phone_number" , "FarmerPhoneNumber" , "woreda" , "Woreda" , "WOREDA"  ]
         
         
         i = 0 
@@ -55,10 +67,13 @@ class findit:
 
         for one_row in headers:
             if i == 0 :
-                for string in one_row:           
+                print(one_row)
+                for item in one_row:  
+                    print(item)   
+                   
                     
-                    if string in list_of_names:
-                        found_df_1_headers.append(string)
+                    if item in list_of_names:
+                        found_df_1_headers.append(item)
                             
             if i == 1 :
                 for string in one_row:
@@ -67,7 +82,7 @@ class findit:
                         found_df_2_headers.append(string)
                             
             if i == 2 :
-                    
+                for string in one_row: 
                     if string in list_of_names:
                         found_df_3_headers.append(string)
                             
@@ -84,8 +99,14 @@ class findit:
         if largest_list == "b":
             self.header = 1 
         if largest_list == "c":
-            self.header == 2 
-        return pd.read_excel(path , header= self.header , engine= "openpyxl")
+            self.header = 2 
+
+        
+        
+        if len(found_df_1_headers) == len(found_df_2_headers)  == len(found_df_3_headers) :
+            return "error"
+        
+        return "go"
     def find_col(self, path):
         
         df_1 = pd.read_excel(path  , nrows= 5 , usecols = [0] , engine= "openpyxl")
@@ -114,20 +135,73 @@ class findit:
             i+=1
 
     def clean(self , path , output_path):
-        self.find_header(path)
+
+        
+        status = self.find_header(path)
         col = self.find_col(path)
+        
+        if status == "error":
+            df = pd.read_excel(path , engine= "openpyxl")
+
+            final_path = out_put_path_2 / Path(path).name
+
+            df.to_excel(final_path ,index=False , engine= "openpyxl") 
+                    
+            return None
+        # start checking the no of colimn called phone and wored if more than one send it to fix folder
+        df_check = pd.read_excel(path , header= self.header , nrows=0 , engine= "openpyxl")
+        df_check = df_check.columns.to_list()
+        s=0
+        k=0
+        for l in df_check:
+        
+            if "phone" in str(l):
+                s+=1 
+            if "woreda" in str(l):
+                k+=1
+        if k>1 or s>1:
+            df = pd.read_excel(path , engine= "openpyxl")
+
+            final_path = out_put_path_2 / Path(path).name
+
+            df.to_excel(final_path ,index=False , engine= "openpyxl") 
+                    
+            return None   
+        # end checking the no of colimn called phone and wored if more than one send it to fix folder       
+        
         df = pd.read_excel(path , header= self.header , engine= "openpyxl")
         df = df.iloc[:, col:]
 
         final_path = output_path / Path(path).name
 
+
         df.to_excel(final_path ,index=False , engine= "openpyxl") 
 
-    
-for file in files:
-    find = findit()
 
-    find.clean(file , out_put_path)
+if __name__ == "__main__":
+    
+
+    path = BASE  / "data" / "extracted" / "sent_files"
+
+
+
+    files = [f for f in path.glob("*.xlsx")]
+
+    out_put_path = BASE / "data" / "cleaned" / "sent_files_precleaned"
+
+    paths =files[0]
+
+
+
+
+    clean = findit()
+    
+
+    for file in files:
+        find = findit()
+
+        find.clean(file , out_put_path)
+
 
 
 

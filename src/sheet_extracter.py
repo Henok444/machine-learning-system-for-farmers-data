@@ -71,7 +71,7 @@ def extract(file: Path )-> None :
    input_path = file 
    multi_sheet = pd.read_excel(input_path , sheet_name= None , engine= "openpyxl")
    output_path = BASE /"data"/ "extracted" / "sent_files"
-   output_path_2 = BASE / "data" / "extracted" /  "data_base_files"
+   output_path_2 = BASE / "data" / "cleaned" /  "data_base_files_cleaned"
    output_path_3 = BASE / "data" / "unrelated_files"
    print("=" *200)
    print(f"extracting the file :---(({file})) ")

@@ -34,6 +34,11 @@ export them to new destination
 
 """
 #===========================================find column name of woreda and column no and clean them ===========================
+BASE = Path(__file__).resolve().parents[1]
+
+path = BASE / "data" / "cleaned" / "sent_files_precleaned"
+output_path_2 = BASE / "data" / "no_woreda_files"
+
 
 class clean_all:
     def __init__(self , header_row = 0 ):
@@ -60,7 +65,7 @@ class clean_all:
 
 
 
-        list_of_phone_names = ["PhoneNumber" , "phone" , "contactnumber" , "phonenumber" , "Phone" , "phoneno", "phone_number" , "Farmer Phone Number"]
+        list_of_phone_names = ["PhoneNumber" , "phone" , "contactnumber" , "phonenumber" , "Phone" , "phoneno", "phone_number" , "farmerphonenumber"]
         list_of_woreda_names = ["woreda" , "Woreda" , "WOREDA" ]
         
 
@@ -97,17 +102,26 @@ class clean_all:
 
         df = self.name_clean(df)
 
-        i = 0       
+        i = 0    
+        j = 0
+        k = 0   
 
         for name in df:
-
-            if name in  list_of_phone_names : 
+            print(name , "phone")
+            if "phone"  in str(name): 
+                print("yes")
+                
                 phone_column_n = i 
-            if name  in list_of_woreda_names:
+                j+=1
+            if "woreda" in str(name):
+                print("yes")
                 woreda_column_n = i 
+                k+=1
             i+=1 
-
-        return phone_column_n ,woreda_column_n 
+        
+        if j == 0 or k ==0:#  to check if there is no phone or woreda in the header
+            return None , None , "error"
+        return phone_column_n ,woreda_column_n , "ok"
     #=======================================================end==========================================
 
     #==================================================clean each phone no ===============================
@@ -121,7 +135,7 @@ class clean_all:
             pass
         if isinstance(value, float) and value.is_integer():
             return str(int(value))
-        text = re.sub(r"\s+", " ", str(value)).strip()
+        text = re.sub(r"\s+", "", str(value)).strip()
         return text or None
 
     def normalize_phone(self , value):
@@ -166,8 +180,16 @@ class clean_all:
 
         # phone and woreda column name are cleaned ================================================
         
-        phone , woreda = self.find_column_no(sheet_path)# column no found and cleaned 
+        phone , woreda , status= self.find_column_no(sheet_path)# column no found and cleaned 
+        if status == "error":
+            sheet = pd.read_excel(sheet_path ,header=  self.header ,  engine= "openpyxl")
 
+            final_path = output_path_2 / Path(sheet_path).name
+
+            sheet.to_excel(final_path , index= False ,engine= "openpyxl")
+            return None
+
+        print(phone , woreda)
 
 
 
@@ -184,6 +206,7 @@ class clean_all:
         # clean every phone no and create a list of phone no ========
         i = 0 
         for phones in phone_list:
+
 
             phone_list[i] = self.normalize_phone(phones)
             i+=1
@@ -205,7 +228,7 @@ class clean_all:
 
         sheet = pd.read_excel(sheet_path ,header=  self.header ,  engine= "openpyxl")
 
-
+        print()
 
         new_woreda_name = "woreda"
         new_phone_no_name = "phone"
@@ -239,10 +262,13 @@ if __name__ == "__main__":
     output_path = BASE / "data" / "cleaned" / "sent_files_cleaned"
 
     list_of_files = [file for file in path.glob("*.xlsx")]
+    
     print(f"found (({len(list_of_files)})) files to be cleaned  and cleaned ")
 
     for file in list_of_files:
         clean = clean_all()
         clean.clean_sheet(file , output_path)
+    print(len(list_of_files))
+
 
 
