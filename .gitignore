@@ -1,4 +1,5 @@
 *.xlsx
 *.pyc
 *.~lock
-/data/storage
+/data
+.venv
